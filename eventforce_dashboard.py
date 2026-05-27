@@ -96,7 +96,14 @@ st.markdown("""
 csv_path = "/Users/jritchie/Downloads/report1779828207111.csv"
 
 try:
-    df = pd.read_csv(csv_path)
+    # Try reading with different encodings
+    try:
+        df = pd.read_csv(csv_path, encoding='utf-8')
+    except UnicodeDecodeError:
+        try:
+            df = pd.read_csv(csv_path, encoding='latin-1')
+        except:
+            df = pd.read_csv(csv_path, encoding='cp1252')
 
     # Clean up column names
     df.columns = df.columns.str.strip()
