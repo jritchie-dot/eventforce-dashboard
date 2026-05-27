@@ -10,11 +10,87 @@ st.set_page_config(
     page_title="Eventforce Pipeline Dashboard",
     page_icon="🎯",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
-st.title("🎯 Eventforce Pipeline Dashboard")
-st.caption(f"Last updated: {date.today().strftime('%B %d, %Y')}")
-st.divider()
+# ── Custom CSS for better styling ─────────────────────────────────────────────
+st.markdown("""
+<style>
+    /* Main title styling */
+    h1 {
+        background: linear-gradient(90deg, #1f77b4 0%, #2ca02c 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
+        padding: 1rem 0;
+    }
+
+    /* Metric card styling */
+    [data-testid="stMetricValue"] {
+        font-size: 2rem;
+        font-weight: 600;
+    }
+
+    [data-testid="stMetricDelta"] {
+        font-size: 0.9rem;
+    }
+
+    /* Section headers */
+    h2, h3 {
+        color: #1f77b4;
+        padding-top: 1rem;
+        padding-bottom: 0.5rem;
+    }
+
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #f0f2f6 0%, #ffffff 100%);
+    }
+
+    /* Success/Warning boxes */
+    .stSuccess, .stWarning, .stInfo {
+        border-radius: 10px;
+        padding: 1rem;
+    }
+
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px 8px 0px 0px;
+        padding: 10px 20px;
+        font-weight: 500;
+    }
+
+    /* DataFrame styling */
+    [data-testid="stDataFrame"] {
+        border-radius: 10px;
+    }
+
+    /* Button styling */
+    .stButton button {
+        border-radius: 8px;
+        font-weight: 500;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# ── Header with gradient background ───────────────────────────────────────────
+st.markdown("""
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem; border-radius: 10px; margin-bottom: 2rem;">
+    <h1 style="color: white; margin: 0; -webkit-text-fill-color: white;">
+        🎯 Eventforce Pipeline Dashboard
+    </h1>
+    <p style="color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 1.1rem;">
+        Real-time insights into event performance, ETOP tracking, and attendance analytics
+    </p>
+    <p style="color: rgba(255,255,255,0.7); margin: 0.3rem 0 0 0;">
+        Last updated: {}</p>
+</div>
+""".format(date.today().strftime('%B %d, %Y')), unsafe_allow_html=True)
 
 # ── Load CSV data ─────────────────────────────────────────────────────────────
 csv_path = "/Users/jritchie/Downloads/report1779828207111.csv"
@@ -57,7 +133,12 @@ except Exception as e:
     st.stop()
 
 # ── Sidebar filters ───────────────────────────────────────────────────────────
-st.sidebar.header("Filters")
+st.sidebar.markdown("""
+<div style="text-align: center; padding: 1rem 0;">
+    <h1 style="color: #667eea; margin: 0;">⚙️</h1>
+    <h2 style="color: #667eea; margin: 0.5rem 0 0 0;">Filters</h2>
+</div>
+""", unsafe_allow_html=True)
 
 # Event type filter - use Event Category if available, otherwise derive from name
 if 'Event Category' in df.columns:
@@ -103,26 +184,75 @@ total_budget = df_filtered['Total Event Budget'].sum() if 'Total Event Budget' i
 total_attendance = int(df_filtered['Total Actual Attendance'].sum()) if 'Total Actual Attendance' in df_filtered.columns else 0
 avg_etop = total_etop / total_events if total_events > 0 else 0
 
+# ── Enhanced KPI Cards with colored containers ───────────────────────────────
 col1, col2, col3, col4, col5 = st.columns(5)
-with col1:
-    st.metric("🎪 Total Events", f"{total_events:,}")
-with col2:
-    events_with_etop_filtered = len(df_filtered[df_filtered['ETOPP Total'] > 0])
-    st.metric("💰 Events w/ ETOP", f"{events_with_etop_filtered:,}", delta=f"${total_etop:,.0f}")
-with col3:
-    events_with_attendance_filtered = len(df_filtered[df_filtered['Total Actual Attendance'] > 0])
-    st.metric("👥 Events w/ Attendance", f"{events_with_attendance_filtered:,}", delta=f"{total_attendance:,} total")
-with col4:
-    avg_attendance = int(total_attendance / events_with_attendance_filtered) if events_with_attendance_filtered > 0 else 0
-    st.metric("📊 Avg Attendance", f"{avg_attendance:,}")
-with col5:
-    avg_etop_per_attendee = int(total_etop / total_attendance) if total_attendance > 0 else 0
-    st.metric("💵 Avg ETOP/Attendee", f"${avg_etop_per_attendee:,}")
 
-st.divider()
+events_with_etop_filtered = len(df_filtered[df_filtered['ETOPP Total'] > 0])
+events_with_attendance_filtered = len(df_filtered[df_filtered['Total Actual Attendance'] > 0])
+avg_attendance = int(total_attendance / events_with_attendance_filtered) if events_with_attendance_filtered > 0 else 0
+avg_etop_per_attendee = int(total_etop / total_attendance) if total_attendance > 0 else 0
+
+with col1:
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 1.5rem; border-radius: 10px; color: white;">
+        <div style="font-size: 0.9rem; opacity: 0.9;">🎪 Total Events</div>
+        <div style="font-size: 2.5rem; font-weight: 700;">{:,}</div>
+    </div>
+    """.format(total_events), unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                padding: 1.5rem; border-radius: 10px; color: white;">
+        <div style="font-size: 0.9rem; opacity: 0.9;">💰 Events w/ ETOP</div>
+        <div style="font-size: 2.5rem; font-weight: 700;">{:,}</div>
+        <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem;">${:,.0f} total</div>
+    </div>
+    """.format(events_with_etop_filtered, total_etop), unsafe_allow_html=True)
+
+with col3:
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                padding: 1.5rem; border-radius: 10px; color: white;">
+        <div style="font-size: 0.9rem; opacity: 0.9;">👥 Events w/ Attendance</div>
+        <div style="font-size: 2.5rem; font-weight: 700;">{:,}</div>
+        <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem;">{:,} total attendees</div>
+    </div>
+    """.format(events_with_attendance_filtered, total_attendance), unsafe_allow_html=True)
+
+with col4:
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+                padding: 1.5rem; border-radius: 10px; color: white;">
+        <div style="font-size: 0.9rem; opacity: 0.9;">📊 Avg Attendance</div>
+        <div style="font-size: 2.5rem; font-weight: 700;">{:,}</div>
+        <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem;">per event</div>
+    </div>
+    """.format(avg_attendance), unsafe_allow_html=True)
+
+with col5:
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+                padding: 1.5rem; border-radius: 10px; color: white;">
+        <div style="font-size: 0.9rem; opacity: 0.9;">💵 Avg ETOP/Attendee</div>
+        <div style="font-size: 2.5rem; font-weight: 700;">${:,}</div>
+        <div style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem;">efficiency metric</div>
+    </div>
+    """.format(avg_etop_per_attendee), unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
 
 # ── Attendance vs ETOP Analysis ──────────────────────────────────────────────
-st.subheader("📊 Attendance & ETOP Analysis")
+st.markdown("""
+<div style="background: linear-gradient(90deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+            padding: 1rem; border-radius: 10px; border-left: 5px solid #667eea; margin: 2rem 0 1rem 0;">
+    <h2 style="margin: 0; color: #667eea;">📊 Attendance & ETOP Analysis</h2>
+    <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.95rem;">
+        Explore the relationship between event attendance and pipeline performance
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 # Calculate ETOP per attendee
 df_filtered['ETOP per Attendee'] = df_filtered.apply(
@@ -171,13 +301,23 @@ with col_efficiency:
     else:
         st.info("No efficiency data available.")
 
-st.divider()
+st.markdown("<br><hr style='border: 1px solid #e0e0e0; margin: 2rem 0;'><br>", unsafe_allow_html=True)
 
 # ── Top Events by Attendance and ETOP ─────────────────────────────────────────
+st.markdown("""
+<div style="background: linear-gradient(90deg, rgba(67,233,123,0.1) 0%, rgba(56,249,215,0.1) 100%);
+            padding: 1rem; border-radius: 10px; border-left: 5px solid #43e97b; margin: 2rem 0 1rem 0;">
+    <h2 style="margin: 0; color: #43e97b;">🏆 Top Performing Events</h2>
+    <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.95rem;">
+        Rankings by attendance and ETOP performance
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
 col_left, col_right = st.columns(2)
 
 with col_left:
-    st.subheader("Top 10 Events by Attendance")
+    st.markdown("**Top 10 Events by Attendance**")
     top_attendance = df_filtered[df_filtered['Total Actual Attendance'] > 0].nlargest(10, 'Total Actual Attendance')[['Event Name', 'Total Actual Attendance', 'ETOPP Total']].copy()
 
     if not top_attendance.empty:
@@ -202,7 +342,7 @@ with col_left:
         st.info("No events with attendance data.")
 
 with col_right:
-    st.subheader("Top 10 Events by ETOP")
+    st.markdown("**Top 10 Events by ETOP**")
     top_events = df_filtered[df_filtered['ETOPP Total'] > 0].nlargest(10, 'ETOPP Total')[['Event Name', 'ETOPP Total', 'Total Actual Attendance']].copy()
 
     if not top_events.empty:
@@ -227,8 +367,17 @@ with col_right:
         st.info("No events with ETOP data.")
 
 # ── Data Quality: Missing Attendance ──────────────────────────────────────────
-st.divider()
-st.subheader("⚠️ Data Quality Check")
+st.markdown("<br><hr style='border: 1px solid #e0e0e0; margin: 2rem 0;'><br>", unsafe_allow_html=True)
+
+st.markdown("""
+<div style="background: linear-gradient(90deg, rgba(245,87,108,0.1) 0%, rgba(240,147,251,0.1) 100%);
+            padding: 1rem; border-radius: 10px; border-left: 5px solid #f5576c; margin: 2rem 0 1rem 0;">
+    <h2 style="margin: 0; color: #f5576c;">⚠️ Data Quality Check</h2>
+    <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.95rem;">
+        Identify events missing critical attendance data
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 col_dq1, col_dq2 = st.columns(2)
 
@@ -267,10 +416,18 @@ with col_dq2:
             att_by_status.columns = ['Status', 'Event Count', 'Total Attendance']
             st.dataframe(att_by_status, use_container_width=True, hide_index=True)
 
-st.divider()
+st.markdown("<br><hr style='border: 1px solid #e0e0e0; margin: 2rem 0;'><br>", unsafe_allow_html=True)
 
 # ── Event Status & Lead Breakdown ────────────────────────────────────────────
-st.subheader("Event Overview")
+st.markdown("""
+<div style="background: linear-gradient(90deg, rgba(74,172,254,0.1) 0%, rgba(0,242,254,0.1) 100%);
+            padding: 1rem; border-radius: 10px; border-left: 5px solid #4facfe; margin: 2rem 0 1rem 0;">
+    <h2 style="margin: 0; color: #4facfe;">📈 Event Overview</h2>
+    <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.95rem;">
+        Status distribution and lead performance metrics
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 col_a, col_b = st.columns(2)
 
@@ -319,11 +476,20 @@ with col_b:
         st.plotly_chart(fig_leads, use_container_width=True)
 
 # ── Detailed Event Table ──────────────────────────────────────────────────────
-st.divider()
-st.subheader("📋 Detailed Event Data")
+st.markdown("<br><hr style='border: 1px solid #e0e0e0; margin: 2rem 0;'><br>", unsafe_allow_html=True)
+
+st.markdown("""
+<div style="background: linear-gradient(90deg, rgba(250,112,154,0.1) 0%, rgba(254,225,64,0.1) 100%);
+            padding: 1rem; border-radius: 10px; border-left: 5px solid #fa709a; margin: 2rem 0 1rem 0;">
+    <h2 style="margin: 0; color: #fa709a;">📋 Detailed Event Data</h2>
+    <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.95rem;">
+        Comprehensive event information with filterable views
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 # Add tabs for different views
-tab1, tab2, tab3 = st.tabs(["All Events", "With Attendance", "Missing Attendance"])
+tab1, tab2, tab3 = st.tabs(["📊 All Events", "✅ With Attendance", "⚠️ Missing Attendance"])
 
 with tab1:
     # Prepare display dataframe with available columns
@@ -392,8 +558,9 @@ with tab3:
         st.success("✅ No missing attendance data!")
 
 # ── Export option ─────────────────────────────────────────────────────────────
-st.divider()
-col_export1, col_export2 = st.columns([3, 1])
+st.markdown("<br><hr style='border: 1px solid #e0e0e0; margin: 2rem 0;'><br>", unsafe_allow_html=True)
+
+col_export1, col_export2, col_export3 = st.columns([2, 1, 1])
 with col_export2:
     csv_export = df_filtered.to_csv(index=False)
     st.download_button(
@@ -401,4 +568,20 @@ with col_export2:
         data=csv_export,
         file_name=f"eventforce_filtered_{date.today().strftime('%Y%m%d')}.csv",
         mime="text/csv",
+        use_container_width=True,
     )
+
+# ── Footer ────────────────────────────────────────────────────────────────────
+st.markdown("""
+<br><br>
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem; border-radius: 10px; text-align: center; color: white;">
+    <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">
+        Built with ❤️ using Streamlit, Plotly, and Pandas
+    </p>
+    <p style="margin: 0.5rem 0 0 0; opacity: 0.7; font-size: 0.8rem;">
+        Eventforce Pipeline Dashboard © 2026
+    </p>
+</div>
+<br>
+""", unsafe_allow_html=True)
